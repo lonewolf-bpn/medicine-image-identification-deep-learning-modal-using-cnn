@@ -1,0 +1,48 @@
+@echo off
+setlocal enabledelayedexpansion
+
+set "sourceFolder=Med_list"
+set "folder1=Med_list_T&T\folder1"
+set "folder2=Med_list_T&T\folder2"
+set "splitRatio=0.75"
+
+REM Create the two new folders
+mkdir "%folder1%"
+mkdir "%folder2%"
+
+REM Iterate through the subfolders in the source folder
+for /d %%d in ("%sourceFolder%\*") do (
+    REM Get the subfolder name
+    set "subfolderName=%%~nd"
+    
+    REM Create the same-named subfolders in folder1 and folder2
+    mkdir "%folder1%\!subfolderName!"
+    mkdir "%folder2%\!subfolderName!"
+    
+    REM Get the file count in the current subfolder
+    set "fileCount=0"
+    for %%f in ("%%d\*") do (
+        set /a "fileCount+=1"
+    )
+    
+    REM Calculate the number of files for folder1 and folder2 based on split ratio
+    set /a "numFolder1Files=!fileCount!*%splitRatio%"
+    set /a "numFolder2Files=!fileCount!-numFolder1Files"
+    
+    REM Initialize file counter
+    set "counter=0"
+    
+    REM Iterate through the files in the current subfolder and copy them to folder1 and folder2
+    for %%f in ("%%d\*") do (
+        if !counter! lss !numFolder1Files! (
+            copy "%%f" "%folder1%\!subfolderName!"
+        ) else (
+            copy "%%f" "%folder2%\!subfolderName!"
+        )
+        
+        REM Increment the file counter
+        set /a "counter+=1"
+    )
+)
+
+echo Files separated into "folder1" and "folder2" with split ratio 75% and 25%.
